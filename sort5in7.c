@@ -27,8 +27,9 @@
 
 #define TEST_SIZE       5       // Number of items in array we're sorting
 
-static size_t   start_comps = 0, num_comps = 0, num_swaps = 0;
-static double   num_sorts = 0;
+static size_t	total_comps = 0, total_swaps = 0;
+static size_t	num_comps = 0, num_swaps = 0;
+static double	total_sorts = 0;
 
 // Returns boolean result of *pa < *pb.  Counts comparisons
 static bool
@@ -109,91 +110,92 @@ sort5in7(int *p1, int *p2, int *p3, int *p4, int *p5)
 } // sort5in7
 
 static void
-print_array(int *a, size_t n)
+print_array(int pa[], size_t n)
 {
-	printf("[ %2d", a[0]);
+	printf("[ %2d", pa[0]);
 	for (size_t i = 1; i < n - 1; i++)
-		printf(", %2d", a[i]);
-	printf(", %2d]\n", a[n - 1]);
+		printf(", %2d", pa[i]);
+	printf(", %2d]\n", pa[n - 1]);
 } // print_array
 
 static void
-validate(int *a, int *t, size_t n)
+validate(int pa[], int cpa[], size_t n)
 {
-	bool	print_io = false;
+	bool	sort_failed = false;
 
 	// Check if sort exceeded 7 comparisons
-	size_t	nc = num_comps - start_comps;
-	if (nc > 7) {
+	if (num_comps > 7) {
 		printf("\nSORT USED GREATER THAN 7 COMPARISONS: ");
-		printf("%lu compares\n", nc);
-		print_io = true;
+		printf("%lu compares\n", num_comps);
+		sort_failed = true;
 	}
 
 	// Check if sorted items are out of order
 	size_t	i;
 	for (i = n - 1; i > 0; i--)
-		if (t[i] < t[i-1])
+		if (cpa[i] < cpa[i-1])
 			break;
 
 	if (i) {
 		printf("\nSORT FAILED\n");
-		print_io = true;
+		sort_failed = true;
 	}
 
 	// Print input and output arrays if required
-	if (print_io) {
+	if (sort_failed) {
 		printf("INPUT ARRAY  -> ");
-		print_array(a, n);
+		print_array(pa, n);
 		printf("OUTPUT ARRAY -> ");
-		print_array(t, n);
+		print_array(cpa, n);
 		printf("\n");
 	}
 } // validate
 
+// Receives an array permutation and invokes the actual
+// sort function. Validates the result after it's sorted
 static void
-permute(int a[], int pos, int n, const void (*_func)(void *, const int))
+call_sort(int pa[], const int n)
+{
+	int cpa[TEST_SIZE];   // Holds copy of items to sort
+
+	// Copy the permuted array before sorting as we do
+	// not want to sort what permute() is working with
+	for (size_t i = 0; i < n; i++) cpa[i] = pa[i];
+
+	// Reset swap and comp counters back to 0
+	num_comps = 0;
+	num_swaps = 0;
+
+	// Call our sort function with the (copied) permutation
+	sort5in7(&cpa[0], &cpa[1], &cpa[2], &cpa[3], &cpa[4]);
+
+	// Validate that it's correct
+	validate(pa, cpa, n);
+
+	total_comps += num_comps;
+	total_swaps += num_swaps;
+	total_sorts += 1;
+} // call_sort
+
+static void
+permute(int a[], int pos, int n)
 {
 	assert(pos < TEST_SIZE);
 
 	if (pos >= (n - 1))
-		return _func(a, n);
+		return call_sort(a, n);
 
 	for (int i = pos, t; i < n; i++) {
 		// Swap current element
 		t = a[pos]; a[pos] = a[i]; a[i] = t;
 
 		// Recurse to permute the rest of the array
-		permute(a, pos + 1, n, _func);
+		permute(a, pos + 1, n);
 
 		// Undo what we swapped
 		t = a[pos]; a[pos] = a[i]; a[i] = t;
 	}
 } // permute
-
-// Receives an array permutation and invokes the actual
-// sort function. Validates the result after it's sorted
-static void
-call_sort(void *va, const int n)
-{
-	int *a = (int *)va;
-	int cpa[TEST_SIZE];   // Holds copy of items to sort
-
-	// Copy the permuted array before sorting as we do
-	// not want to sort what permute() is working with
-	for (size_t i = 0; i < n; i++) cpa[i] = a[i];
-
-	// Save current comparisons counter
-	start_comps = num_comps;
-
-	// Call our sort function with the (copied) permutation
-	sort5in7(&cpa[0], &cpa[1], &cpa[2], &cpa[3], &cpa[4]);
-
-	// Validate that it's correct
-	validate(a, cpa, n);
-
-	num_sorts++;
-} // do_sort
 
 int
 main()
@@ -206,8 +208,8 @@ main()
 	for (int i = 0; i < TEST_SIZE; i++)
 		p[i] = i + 1;
 
-	permute(p, 0, TEST_SIZE, call_sort);
+	permute(p, 0, TEST_SIZE);
 
-	printf("num_sorts = %7.0f,  avg. comps = %7.3f,  avg. swaps = %7.3f\n\n",
-		num_sorts, num_comps/num_sorts, num_swaps/num_sorts);
+	printf("total_sorts = %7.0f,  avg. comps = %7.3f,  avg. swaps = %7.3f\n\n",
+		total_sorts, total_comps/total_sorts, total_swaps/total_sorts);
 } // main
