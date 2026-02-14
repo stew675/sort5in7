@@ -55,7 +55,7 @@ swap(int *pa, int *pb)
 static void
 sort5in7(int *p1, int *p2, int *p3, int *p4, int *p5)
 {
-	bool p1_was_moved = false;
+	bool p1_was_swapped_with_p3 = false;
 
 	// Sort p1 and p2
 	if (is_lt(p2, p1))
@@ -86,25 +86,29 @@ sort5in7(int *p1, int *p2, int *p3, int *p4, int *p5)
 		// Take note of if P3 < P1, as this will move
 		// P1 past P2 into P3, and we can save on a
 		// comparison later if we record this result
-		if ((p1_was_moved = is_lt(p3, p1)))
+		if (is_lt(p3, p1)) {
 			swap(p1, p3);
+			p1_was_swapped_with_p3 = true;
+		}
 	}
 
-	// We now know that:  P1 <= P3 <= P4 <= P5
-	// If P1 was moved to P3 above, then P2 and P3 must be swapped
-	// If P1 was not moved to P3, then we also know that P1 <= P2
-	// Now place P2 into P3/P4/P5 using a binary search.
+	// We now know that:  P1 <= P3 <= P4 <= P5, AND P1 <= P2
+	// Additionally if P1 was swapped with P3 above, then we
+	// also know that P3 <= P2
+	// Now we insert P2 into P3/P4/P5 using a binary search.
 	if (is_lt(p4, p2)) {
-		// Move P2 up to P4
-		swap(p2, p3);	// Also satisfies the p1_was_moved scenario
+		// Shift P2 up to P4
+		swap(p2, p3);	// Satisfies the p1_was_swapped_with_p3 case
 		swap(p3, p4);
 		// Now test if we need to move P4 to P5
 		if (is_lt(p5, p4))
 			swap(p4, p5);
 	} else {
-		// If P1 had moved to P3 then we can just swap P2 and P3
-		// Otherwise we need to check if P3 < P2 before swapping
-		if (p1_was_moved || is_lt(p3, p2))
+		// We need to check if P2 moves to before or after P3
+		// If P1 was swapped with P3 earlier then we can just swap
+		// P2 and P3 without doing a comparison, otherwise we need
+		// to check if P3 < P2 before swapping
+		if (p1_was_swapped_with_p3 || is_lt(p3, p2))
 			swap(p2, p3);
 	}
 } // sort5in7
