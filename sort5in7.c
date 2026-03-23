@@ -24,6 +24,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <stddef.h>
+
+_Static_assert(sizeof(size_t) >= sizeof(int), "size_t must be at least int");
+
 
 #define TEST_SIZE       (size_t)5       // Number of items in array we're sorting
 #define HISTOGRAM_SIZE  (size_t)10      // Number of items in histogram table
@@ -132,7 +136,7 @@ validate(int pa[], int cpa[], size_t n)
         // Check if sort exceeded 7 comparisons
         if (num_comps > 7) {
                 printf("\nSORT USED GREATER THAN 7 COMPARISONS: ");
-                printf("%lu compares\n", num_comps);
+                printf("%zu compares\n", num_comps);
                 sort_failed = true;
         }
 
@@ -197,9 +201,9 @@ permute(int a[], size_t pos, size_t n)
         if (pos >= (n - 1))
                 return call_sort(a, n);
 
-        for (int i = pos, t; i < n; i++) {
+        for (size_t i = pos; i < n; i++) {
                 // Swap current element
-                t = a[pos]; a[pos] = a[i]; a[i] = t;
+                int t = a[pos]; a[pos] = a[i]; a[i] = t;
 
                 // Recurse to permute the rest of the array
                 permute(a, pos + 1, n);
@@ -217,7 +221,7 @@ main()
         printf("\nTest Sort Size is %zu items\n\n", TEST_SIZE);
 
         // Initialise the permute test array
-        for (int i = 0; i < TEST_SIZE; i++)
+        for (size_t i = 0; i < TEST_SIZE; i++)
                 p[i] = i + 1;
 
         permute(p, 0, TEST_SIZE);
