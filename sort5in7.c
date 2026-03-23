@@ -25,13 +25,13 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define TEST_SIZE       5       // Number of items in array we're sorting
-#define HISTOGRAM_SIZE  16      // Number of items in histogram table
+#define TEST_SIZE       (size_t)5       // Number of items in array we're sorting
+#define HISTOGRAM_SIZE  (size_t)10      // Number of items in histogram table
 
 static  size_t  total_comps = 0, total_swaps = 0;
 static  size_t  num_comps = 0, num_swaps = 0;
 static  double  total_sorts = 0;
-static  size_t  histogram[HISTOGRAM_SIZE] = {0};
+static  size_t  histogram[HISTOGRAM_SIZE + 1] = {0};
 
 // Returns boolean result of *pa < *pb.  Counts comparisons
 static bool
@@ -136,9 +136,11 @@ validate(int pa[], int cpa[], size_t n)
                 sort_failed = true;
         }
 
-        if (num_comps < HISTOGRAM_SIZE) {
-                histogram[num_comps]++;
-        }
+        if (num_comps > HISTOGRAM_SIZE) {
+		histogram[HISTOGRAM_SIZE]++;
+	} else {
+		histogram[num_comps]++;
+	}
 
         // Check if sorted items are out of order
         size_t  i;
@@ -164,7 +166,7 @@ validate(int pa[], int cpa[], size_t n)
 // Receives an array permutation and invokes the actual
 // sort function. Validates the result after it's sorted
 static void
-call_sort(int pa[], const int n)
+call_sort(int pa[], const size_t n)
 {
         int cpa[TEST_SIZE];   // Holds copy of items to sort
 
@@ -188,7 +190,7 @@ call_sort(int pa[], const int n)
 } // call_sort
 
 static void
-permute(int a[], int pos, int n)
+permute(int a[], size_t pos, size_t n)
 {
         assert(pos < TEST_SIZE);
 
@@ -212,7 +214,7 @@ main()
 {
         int     p[TEST_SIZE] = {0};
 
-        printf("\nTest Sort Size is %d items\n\n", (int)TEST_SIZE);
+        printf("\nTest Sort Size is %zu items\n\n", TEST_SIZE);
 
         // Initialise the permute test array
         for (int i = 0; i < TEST_SIZE; i++)
@@ -225,12 +227,16 @@ main()
         printf(" | Comparisons |    Count    |\n");
         printf(" +-------------+-------------+\n");
         int     separator_needed = 0;
-        for (int i = 0; i < HISTOGRAM_SIZE; i++)
+        for (size_t i = 0; i <= HISTOGRAM_SIZE; i++)
                 if (histogram[i] > 0) {
                         if (separator_needed) {
         			printf(" +-------------+-------------+\n");
                         }
-                        printf(" |   %4lu      |    %4lu     |\n", i, histogram[i]);
+			if (i == HISTOGRAM_SIZE) {
+	                        printf(" |   %4zu+     |    %4zu     |\n", i, histogram[i]);
+			} else {
+	                        printf(" |   %4zu      |    %4zu     |\n", i, histogram[i]);
+			}
                         separator_needed = 1;
                 }
         printf(" +-------------+-------------+\n\n");
