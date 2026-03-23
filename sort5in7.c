@@ -221,19 +221,19 @@ main()
         permute(p, 0, TEST_SIZE);
 
         printf("     Comparison Histogram\n");
-        printf(" ┏━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓\n");
-        printf(" ┃ Comparisons ┃    Count    ┃\n");
-        printf(" ┣━━━━━━━━━━━━━╋━━━━━━━━━━━━━┫\n");
-        int     first_emitted = 1;
+        printf(" +-------------+-------------+\n");
+        printf(" | Comparisons |    Count    |\n");
+        printf(" +-------------+-------------+\n");
+        int     separator_needed = 0;
         for (int i = 0; i < HISTOGRAM_SIZE; i++)
                 if (histogram[i] > 0) {
-                        if (first_emitted == 0) {
-                                printf(" ┠─────────────╂─────────────┨\n", i, histogram[i]);
+                        if (separator_needed) {
+        			printf(" +-------------+-------------+\n");
                         }
-                        printf(" ┃   %4lu      ┃    %4lu     ┃\n", i, histogram[i]);
-                        first_emitted = 0;
+                        printf(" |   %4lu      |    %4lu     |\n", i, histogram[i]);
+                        separator_needed = 1;
                 }
-        printf(" ┗━━━━━━━━━━━━━┻━━━━━━━━━━━━━┛\n\n");
+        printf(" +-------------+-------------+\n\n");
 
         printf("total_sorts = %7.0f,  avg. comps = %7.3f,  avg. swaps = %7.3f\n\n",
                 total_sorts, total_comps/total_sorts, total_swaps/total_sorts);
