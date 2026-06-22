@@ -234,11 +234,7 @@ main()
 			continue;
 		printf(" +-------------+-------------+\n");
 		printf(" |   %4zu%c     |    %4zu     |\n", i,
-			(i < HISTOGRAM_SIZE) ? ' ' : '+', histogram[i]);
-//			if (i == HISTOGRAM_SIZE) {
-//			} else {
-//				printf(" |   %4zu      |    %4zu     |\n", i, histogram[i]);
-//			}
+				(i < HISTOGRAM_SIZE) ? ' ' : '+', histogram[i]);
 	}
 	printf(" +-------------+-------------+\n\n");
 
